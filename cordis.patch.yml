@@ -1,0 +1,16 @@
+# dsh bundle layer：麦麦（MaiBot）插件写作工具。
+#
+# 这里刻意不写死 maibotRoot。解析顺序：
+#   工具参数 maibotRoot
+#   → 本层 config.maibotRoot
+#   → 环境变量 DSH_MAIBOT_ROOT / MAIBOT_ROOT
+#   → 当前工作目录向上探测
+#   → 常见安装位置自动发现（一键包 %APPDATA%\MaiBotOneKeyDesktop\*\modules\MaiBot、~/MaiBot 等）
+#
+# 单机想固定路径时，在 ~/.dsh/profiles/<profile>/cordis.patch.yml 里按同 id 覆盖 config 即可
+# （profile 层优先级高于 bundle 层，非 insert 的同 id patch 会覆盖对应键）。
+- insert:
+    - id: dsh-maibot-plugin-writer
+      name: 'dsh-maibot-plugin-writer'
+      config:
+        maibotRoot: ''

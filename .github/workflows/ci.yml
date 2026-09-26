@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      # 本包零运行时依赖，单元测试不需要 npm install（也就能在无网络环境跑）
+      - name: 单元测试
+        run: npm test
+      - name: 语法检查
+        run: |
+          for file in lib/*.js test/*.mjs scripts/*.mjs; do node --check "$file"; done
+      - name: 检查发布产物
+        run: npm pack --dry-run
