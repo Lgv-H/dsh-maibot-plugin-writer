@@ -79,16 +79,18 @@ MaiBot 的插件契约细节多、版本内演进快。凭记忆写，踩的都�
 
 ## 安装
 
-```sh
-# 1) 从 npm 或插件市场
-dsh plugin --profile web add dsh-maibot-plugin-writer
+本插件**只通过 GitHub 分发，不发布到 npm**（`package.json` 已设 `private: true`）。
 
-# 2) 从仓库目录（开发/自用）
+```sh
+# 1) 检出并链接进 profile
 git clone https://github.com/Lgv-H/dsh-maibot-plugin-writer.git
 dsh plugin --profile web add link:/path/to/dsh-maibot-plugin-writer
 
-# 3) 无网络环境（仓库检出用户可用；等价于 2)，不依赖 pnpm 联网）
+# 2) 无网络/无 registry 环境（等价于 1) 的链接安装，不依赖 pnpm 联网）
+cd dsh-maibot-plugin-writer
 node scripts/deploy-local.mjs --profile web
+
+# 3) 或经插件市场安装：仓库公开并带上 dsh-plugin 主题后，市场的 GitHub 来源可检索到（以市场实际收录为准）
 ```
 
 安装/更新后**需要重启一次该 profile 的服务**。随包 skill 由文件监视器热加载，无需重启即可被新会话看到。
@@ -206,6 +208,7 @@ CI（GitHub Actions）在 Node 20 与 22 上跑 `npm test` + `node --check` + `n
 | 校验报"重复插件 ID" | 宿主遇到重复 ID 会同时丢弃两个候选，先改掉其中一个 ID 或删除旧目录 |
 | 安装成功但插件不生效 | 生成的插件默认 `enabled = false`；改成 `true` 后宿主会自行重载 |
 | 市场里安装 / 更新失败 | 本插件与网络无关；如果本机 pnpm 访问不到 registry，用 `scripts/deploy-local.mjs` 离线部署 |
+| 更新到最新版 | 在仓库目录 `git pull`，再跑 `node scripts/deploy-local.mjs --profile web --force`，然后重启服务 |
 
 ## 开发
 
@@ -232,7 +235,7 @@ lib/
   ast_probe.py    Python AST 探针（语法、导入、调用链、类结构、open 模式）
 skills/maibot-plugin-writer/SKILL.md
 scripts/deploy-local.mjs   离线本地部署（不依赖 pnpm 联网）
-scripts/verify-publish.mjs 发布后核验（npm + GitHub 是否真的上线）
+scripts/verify-publish.mjs 发布后核验（远端仓库/标签是否与本地一致）
 test/unit.mjs | test/smoke.mjs | test/hooks.mjs
 ```
 
@@ -247,16 +250,20 @@ node scripts/deploy-local.mjs --profile web --force   # 同步到 profile 并重
 
 ## 发布
 
-```sh
-npm pack --dry-run          # 确认产物清单（files 白名单）
-npm publish --access public
+只有 GitHub 一个渠道（`package.json` 的 `private: true` 会阻止 `npm publish`，需要正式发包时删掉该字段）。
 
-git push -u origin main
+```sh
+npm test && npm run test:smoke        # 发版前跑通
+node scripts/verify-publish.mjs       # 确认远端仓库/标签与本地 HEAD 一致
+
+git tag -a v0.0.0 -m "v0.0.0"         # 换成实际版本号
+git push origin main --tags
 ```
 
-建议给仓库打 `dsh-plugin` 主题标签，便于生态检索。
+随后在 GitHub 上对着该标签建 Release，正文直接用 [CHANGELOG.md](CHANGELOG.md) 的对应段落。
+建议同时补好仓库的 Description 与 Topics（`dsh-plugin`、`deepseek-harness`、`maibot`、`ai-generated`），便于生态检索。
 
-发布后可以运行 `node scripts/verify-publish.mjs` 核验 npm 与 GitHub 是否真的上线（加 `--strict` 可作发版门禁；GitHub 私有仓库会被匿名 API 记为未找到）。
+需要 tarball 分发时用 `npm pack --dry-run` 检查产物清单（打包不受 `private` 影响，只有 publish 被禁）。
 
 ## AI 编写声明
 

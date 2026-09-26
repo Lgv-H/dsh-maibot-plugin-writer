@@ -4,14 +4,27 @@
 
 ## [未发布]
 
+### 变更
+
+- 分发渠道确定为 GitHub 单渠道：README（中英）的安装章节移除 npm 安装方式，改为「git clone + link 安装 / 离线脚本 / 市场 GitHub 来源」
+- 发布章节改为「跑测试 → 核验 → 打标签 → `git push --tags` → GitHub Release」
+- `package.json` 增加 `private: true`，阻止误发 npm（需要正式发包时删掉该字段即可）
+
+### 修复
+
+- 修复 `package.json` 的 `description` 被写成乱码：此前用 PowerShell 重写该文件时按系统编码解码导致，现已恢复为正确的中文描述并统一 2 空格 JSON 格式
+
 ### 工具
 
-- 新增 scripts/verify-publish.mjs：发布后一键核验 npm 与 GitHub 是否真的上线（`--strict` 可作发版门禁）
+- 新增 scripts/verify-publish.mjs：核验远端仓库/标签与本地 HEAD 是否一致（`--strict` 可作发版门禁）
+- `verify-publish.mjs` 在 `private: true` 时跳过 npm 检查，只核验 GitHub 渠道
+- 新增 `npm run verify` 入口
 
 ### 文档
 
 - README 重写为 DSH 插件通用结构（这是什么 / 核心能力 / 安装 / 快速开始 / 配置 / 权限与数据披露 / 兼容性 / 测试与验证 / 已知限制 / 故障排查 / 开发 / 发布），并新增「AI 编写声明」
 - 新增英文镜像 README.en.md，package.json 发布白名单同步加入
+- 故障排查表补充「更新到最新版」一条
 
 ## [0.1.0] - 2026-09-26
 

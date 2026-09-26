@@ -52,16 +52,18 @@ MaiBot's plugin contract is detailed and moves within versions. Writing from mem
 
 ## Install
 
-```sh
-# 1) From npm or the plugin market
-dsh plugin --profile web add dsh-maibot-plugin-writer
+This plugin is distributed **through GitHub only — it is not published to npm** (`package.json` sets `private: true`).
 
-# 2) From a checkout (development / local use)
+```sh
+# 1) Clone and link into a profile
 git clone https://github.com/Lgv-H/dsh-maibot-plugin-writer.git
 dsh plugin --profile web add link:/path/to/dsh-maibot-plugin-writer
 
-# 3) Offline (checkout users; same as 2 without pnpm needing the registry)
+# 2) Offline / registry-less (same as 1 without pnpm needing the registry)
+cd dsh-maibot-plugin-writer
 node scripts/deploy-local.mjs --profile web
+
+# 3) Or via the plugin market: once the repository is public and carries the dsh-plugin topic, the market's GitHub source can find it
 ```
 
 Restart the profile's service once after installing/updating. The bundled skill is picked up by the file watcher, so it is visible to new sessions without a restart.
@@ -156,6 +158,7 @@ CI runs `npm test`, `node --check` and `npm pack --dry-run` on Node 20 and 22.
 | "duplicate plugin id" | The host drops both candidates; rename one id or remove the stale directory |
 | Installed but nothing happens | Generated plugins are `enabled = false`; set it to `true` and the host reloads itself |
 | Market install/update fails | Unrelated to this plugin; if pnpm cannot reach the registry, use `scripts/deploy-local.mjs` |
+| Updating to the latest version | `git pull` in the checkout, re-run `node scripts/deploy-local.mjs --profile web --force`, then restart the service |
 
 ## Development
 
@@ -168,17 +171,22 @@ node scripts/deploy-local.mjs --profile web --force   # sync into a profile, the
 
 > The runtime copy must live inside `<profile>/plugins/`: Node resolves bare specifiers (`@deepseek-ai/dsh-tools`) from the module's **real path**, so linking that directory elsewhere breaks plugin loading.
 
-## Publish
+## Release
+
+GitHub is the only channel (`private: true` blocks `npm publish`; drop that field if you ever want to publish to npm).
 
 ```sh
-npm pack --dry-run
-npm publish --access public
-git push -u origin main
+npm test && npm run test:smoke        # green before tagging
+node scripts/verify-publish.mjs       # remote repo/tag vs local HEAD
+
+git tag -a v0.0.0 -m "v0.0.0"         # use the real version
+git push origin main --tags
 ```
 
-Adding the `dsh-plugin` topic to the repository helps ecosystem discovery.
+Then create a GitHub Release from that tag, using the matching [CHANGELOG.md](CHANGELOG.md) section as the body.
+Filling in the repository Description and Topics (`dsh-plugin`, `deepseek-harness`, `maibot`, `ai-generated`) helps ecosystem discovery.
 
-After publishing, run `node scripts/verify-publish.mjs` to confirm the package is really on npm and the repository on GitHub (`--strict` turns it into a release gate; private GitHub repos are reported as not found).
+Use `npm pack --dry-run` when you need a tarball for distribution — packaging still works, only publishing is blocked.
 
 ## AI authorship
 

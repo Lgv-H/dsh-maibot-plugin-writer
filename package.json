@@ -1,82 +1,82 @@
 {
-    "name":  "dsh-maibot-plugin-writer",
-    "version":  "0.1.0",
-    "description":  "璁?DSH锛圖eepSeek Harness锛夎嚜宸辩紪鍐欍€佹牎楠屻€佸畨瑁呴害楹︼紙MaiBot锛夋彃浠讹細maibot_plugin_scaffold / maibot_plugin_validate / maibot_plugin_install / maibot_plugin_catalog / maibot_sdk_reference",
-    "type":  "module",
-    "main":  "lib/index.js",
-    "exports":  {
-                    ".":  "./lib/index.js",
-                    "./package.json":  "./package.json"
-                },
-    "files":  [
-                  "lib",
-                  "skills",
-                  "cordis.patch.yml",
-                  "README.md",
-                  "CHANGELOG.md",
-                  "LICENSE",
-                  "README.en.md"
-              ],
-    "engines":  {
-                    "node":  "\u003e=20.0.0"
-                },
-    "scripts":  {
-                    "test":  "node test/unit.mjs",
-                    "test:smoke":  "node test/smoke.mjs",
-                    "test:repo":  "node --import ./test/register-hooks.mjs test/smoke.mjs",
-                    "pack:check":  "npm pack --dry-run",
-                    "deploy:local":  "node scripts/deploy-local.mjs"
-                },
-    "keywords":  [
-                     "dsh",
-                     "dsh-plugin",
-                     "deepseek-harness",
-                     "maibot",
-                     "maimai",
-                     "plugin-writer",
-                     "plugin-generator",
-                     "code-generation"
-                 ],
-    "license":  "MIT",
-    "author":  {
-                   "name":  "Lgv-H",
-                   "url":  "https://github.com/Lgv-H"
-               },
-    "repository":  {
-                       "type":  "git",
-                       "url":  "git+https://github.com/Lgv-H/dsh-maibot-plugin-writer.git"
-                   },
-    "bugs":  {
-                 "url":  "https://github.com/Lgv-H/dsh-maibot-plugin-writer/issues"
-             },
-    "homepage":  "https://github.com/Lgv-H/dsh-maibot-plugin-writer#readme",
-    "dsh":  {
-                "bundle":  {
-                               "patch":  "./cordis.patch.yml"
-                           },
-                "disclosures":  {
-                                    "risk":  "medium",
-                                    "network":  false,
-                                    "filesystem":  "workspace-write",
-                                    "credentials":  [
-
-                                                    ]
-                                }
-            },
-    "peerDependencies":  {
-                             "@deepseek-ai/cordis":  "*",
-                             "@deepseek-ai/dsh-tools":  "*",
-                             "@deepseek-ai/schemastery":  "*"
-                         },
-    "peerDependenciesMeta":  {
-                                 "@deepseek-ai/cordis":  {
-                                                             "optional":  true
-                                                         },
-                                 "@deepseek-ai/dsh-tools":  {
-                                                                "optional":  true
-                                                            },
-                                 "@deepseek-ai/schemastery":  {
-                                                                  "optional":  true
-                                                              }
-                             }
+  "name": "dsh-maibot-plugin-writer",
+  "version": "0.1.0",
+  "description": "让 DSH（DeepSeek Harness）自己编写、校验、安装麦麦（MaiBot）插件：maibot_plugin_scaffold / maibot_plugin_validate / maibot_plugin_install / maibot_plugin_catalog / maibot_sdk_reference",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "skills",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "test": "node test/unit.mjs",
+    "test:smoke": "node test/smoke.mjs",
+    "test:repo": "node --import ./test/register-hooks.mjs test/smoke.mjs",
+    "pack:check": "npm pack --dry-run",
+    "deploy:local": "node scripts/deploy-local.mjs",
+    "verify": "node scripts/verify-publish.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "maibot",
+    "maimai",
+    "plugin-writer",
+    "plugin-generator",
+    "code-generation"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Lgv-H",
+    "url": "https://github.com/Lgv-H"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lgv-H/dsh-maibot-plugin-writer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Lgv-H/dsh-maibot-plugin-writer/issues"
+  },
+  "homepage": "https://github.com/Lgv-H/dsh-maibot-plugin-writer#readme",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "disclosures": {
+      "risk": "medium",
+      "network": false,
+      "filesystem": "workspace-write",
+      "credentials": []
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/dsh-tools": "*",
+    "@deepseek-ai/schemastery": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tools": {
+      "optional": true
+    },
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  }
 }
