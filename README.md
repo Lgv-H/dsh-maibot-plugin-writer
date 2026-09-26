@@ -232,6 +232,7 @@ lib/
   ast_probe.py    Python AST 探针（语法、导入、调用链、类结构、open 模式）
 skills/maibot-plugin-writer/SKILL.md
 scripts/deploy-local.mjs   离线本地部署（不依赖 pnpm 联网）
+scripts/verify-publish.mjs 发布后核验（npm + GitHub 是否真的上线）
 test/unit.mjs | test/smoke.mjs | test/hooks.mjs
 ```
 
@@ -254,6 +255,8 @@ git push -u origin main
 ```
 
 建议给仓库打 `dsh-plugin` 主题标签，便于生态检索。
+
+发布后可以运行 `node scripts/verify-publish.mjs` 核验 npm 与 GitHub 是否真的上线（加 `--strict` 可作发版门禁；GitHub 私有仓库会被匿名 API 记为未找到）。
 
 ## AI 编写声明
 

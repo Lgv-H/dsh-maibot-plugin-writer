@@ -178,6 +178,8 @@ git push -u origin main
 
 Adding the `dsh-plugin` topic to the repository helps ecosystem discovery.
 
+After publishing, run `node scripts/verify-publish.mjs` to confirm the package is really on npm and the repository on GitHub (`--strict` turns it into a release gate; private GitHub repos are reported as not found).
+
 ## AI authorship
 
 **Every part of this repository is AI-written and AI-maintained**, including `lib/`, `test/`, `scripts/`, `skills/`, [SECURITY.md](SECURITY.md), [CHANGELOG.md](CHANGELOG.md) and this README.
