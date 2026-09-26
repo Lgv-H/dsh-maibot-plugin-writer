@@ -220,6 +220,17 @@ test('templates: 生成内容满足宿主 manifest 约束', () => {
   assert(built.files['plugin.py'].includes('from __future__ import annotations'), '应有 future annotations')
 })
 
+test('templates: 作者段含连字符时推导正确', () => {
+  const built = buildPluginFiles({ pluginId: 'lgv-h.private-message-tool' })
+  const manifest = JSON.parse(built.files['_manifest.json'])
+  assertEqual(built.dirName, 'lgv-h_private-message-tool', 'dirName')
+  assertEqual(built.pluginClass, 'PrivateMessageTool', '类名应取点号后的完整名称')
+  assertEqual(manifest.author.url, 'https://github.com/lgv-h', 'author.url 不应被连字符拆坏')
+  assertEqual(manifest.urls.repository, 'https://github.com/lgv-h/private-message-tool', 'repository 同理')
+  assert(built.files['plugin.py'].includes('class PrivateMessageTool(MaiBotPlugin)'), '类名应写进代码')
+  assert(built.files['plugin.py'].includes('class PrivateMessageToolConfig(PluginConfigBase)'), '聚合配置类名同理')
+})
+
 test('templates: 非法 ID 直接报错', () => {
   assertThrows(() => buildPluginFiles({ pluginId: 'NoDot' }), '插件 ID 不合法', '缺分隔符')
   assertThrows(() => buildPluginFiles({ pluginId: 'a..b' }), '插件 ID 不合法', '连续分隔符')
