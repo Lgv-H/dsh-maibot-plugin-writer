@@ -52,7 +52,7 @@ MaiBot's plugin contract is detailed and moves within versions. Writing from mem
 
 ## Install
 
-This plugin is distributed **through GitHub only — it is not published to npm** (`package.json` sets `private: true`).
+This plugin is distributed **through GitHub only** — there is no npm package. Pick one of the three ways below.
 
 ```sh
 # 1) Clone and link into a profile
@@ -171,22 +171,23 @@ node scripts/deploy-local.mjs --profile web --force   # sync into a profile, the
 
 > The runtime copy must live inside `<profile>/plugins/`: Node resolves bare specifiers (`@deepseek-ai/dsh-tools`) from the module's **real path**, so linking that directory elsewhere breaks plugin loading.
 
-## Release
+## Versions & updating
 
-GitHub is the only channel (`private: true` blocks `npm publish`; drop that field if you ever want to publish to npm).
+- **Current version: v0.1.0.** Published versions and release notes live in [Releases](https://github.com/Lgv-H/dsh-maibot-plugin-writer/releases); the full history is in [CHANGELOG.md](CHANGELOG.md).
+- First-time installation: see [Install](#install) above.
+
+Update to the latest version (inside your clone):
 
 ```sh
-npm test && npm run test:smoke        # green before tagging
-node scripts/verify-publish.mjs       # remote repo/tag vs local HEAD
-
-git tag -a v0.0.0 -m "v0.0.0"         # use the real version
-git push origin main --tags
+git pull
+node scripts/deploy-local.mjs --profile web --force   # re-sync into the profile
 ```
 
-Then create a GitHub Release from that tag, using the matching [CHANGELOG.md](CHANGELOG.md) section as the body.
-Filling in the repository Description and Topics (`dsh-plugin`, `deepseek-harness`, `maibot`, `ai-generated`) helps ecosystem discovery.
+Restart the profile's service afterwards to load the new code. If you installed through the plugin market, use the market's own update entry.
 
-Use `npm pack --dry-run` when you need a tarball for distribution — packaging still works, only publishing is blocked.
+To pin a version: `git checkout v0.1.0`, then re-run the sync command.
+
+> Maintainers: see [RELEASING.md](RELEASING.md).
 
 ## AI authorship
 

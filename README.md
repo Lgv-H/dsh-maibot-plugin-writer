@@ -79,7 +79,7 @@ MaiBot 的插件契约细节多、版本内演进快。凭记忆写，踩的都�
 
 ## 安装
 
-本插件**只通过 GitHub 分发，不发布到 npm**（`package.json` 已设 `private: true`）。
+本插件**只通过 GitHub 分发**（npm 上没有这个包），下面三种方式任选其一。
 
 ```sh
 # 1) 检出并链接进 profile
@@ -248,22 +248,23 @@ node scripts/deploy-local.mjs --profile web --force   # 同步到 profile 并重
 
 > 注意：运行时副本必须位于 `<profile>/plugins/` 内。Node 按**真实路径**解析裸包名（`@deepseek-ai/dsh-tools`），把该目录做成指向别处的链接会导致插件加载失败。
 
-## 发布
+## 版本与更新
 
-只有 GitHub 一个渠道（`package.json` 的 `private: true` 会阻止 `npm publish`，需要正式发包时删掉该字段）。
+- **当前版本：v0.1.0**。历史版本与发布说明见 [Releases](https://github.com/Lgv-H/dsh-maibot-plugin-writer/releases)，逐条变更见 [CHANGELOG.md](CHANGELOG.md)。
+- 首次安装见上面的[安装](#安装)章节。
+
+更新到最新版（在克隆下来的仓库目录里执行）：
 
 ```sh
-npm test && npm run test:smoke        # 发版前跑通
-node scripts/verify-publish.mjs       # 确认远端仓库/标签与本地 HEAD 一致
-
-git tag -a v0.0.0 -m "v0.0.0"         # 换成实际版本号
-git push origin main --tags
+git pull
+node scripts/deploy-local.mjs --profile web --force   # 重新同步进 profile
 ```
 
-随后在 GitHub 上对着该标签建 Release，正文直接用 [CHANGELOG.md](CHANGELOG.md) 的对应段落。
-建议同时补好仓库的 Description 与 Topics（`dsh-plugin`、`deepseek-harness`、`maibot`、`ai-generated`），便于生态检索。
+之后**重启一次该 profile 的服务**即可加载新代码。如果是从插件市场安装的，按市场提供的更新入口操作。
 
-需要 tarball 分发时用 `npm pack --dry-run` 检查产物清单（打包不受 `private` 影响，只有 publish 被禁）。
+想固定某个版本：先 `git checkout v0.1.0`，再执行上面的同步命令。
+
+> 维护者发版流程见 [RELEASING.md](RELEASING.md)。
 
 ## AI 编写声明
 
