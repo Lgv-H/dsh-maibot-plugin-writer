@@ -13,7 +13,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { loadCapabilities, loadCtxMembers, loadSdkMethods } from '../lib/host.js'
+import { loadCapabilities, loadCtxMembers, loadReservedCommands, loadSdkMethods } from '../lib/host.js'
 import { installPlugin } from '../lib/install.js'
 import { detectMaibotRoot, isMaibotRoot, resolveMaibotRoot, resolveUserPath } from '../lib/paths.js'
 import { buildReference } from '../lib/reference.js'
@@ -44,6 +44,11 @@ const STUB_HOST = {
     ['send', ['image', 'text']],
   ]),
   ctxMembers: new Set(['api', 'config', 'frequency', 'logger', 'paths', 'plugin_id', 'send']),
+  reservedCommands: new Map([
+    ['/pm', 'src/plugins/built_in/plugin_management/plugin.py 的 @Command pattern'],
+    ['/clear', 'src/maisaka/context/clear_context.py 的 CLEAR_CONTEXT_COMMAND'],
+  ]),
+  maibotRoot: join(tmpRoot, 'stub-maibot'),
 }
 
 /** 单元测试不做 AST 深检。 */
@@ -147,7 +152,7 @@ function pluginFiles(mutations = {}) {
  * @returns {object} 校验结果。
  */
 function runValidate(files, options = {}) {
-  const dir = join(tmpRoot, `case-${Math.random().toString(36).slice(2, 8)}`)
+  const dir = options.dir ?? join(tmpRoot, `case-${Math.random().toString(36).slice(2, 8)}`)
   writePlugin(dir, files)
   return validatePlugin({
     dir,
@@ -356,11 +361,46 @@ test('validate: 不存在的 ctx 方法', () => {
   assert(codes(validation).has('capability.method_unknown'), '应报方法不存在')
 })
 
-test('validate: 重复插件 ID', () => {
+test('validate: plugins/ 下的同 ID 才是 error', () => {
+  const dir = join(STUB_HOST.maibotRoot, 'plugins', 'tester_sample-plugin')
   const validation = runValidate(pluginFiles(), {
-    installedPlugins: [{ id: 'tester.sample-plugin', dir: join(tmpRoot, 'elsewhere') }],
+    dir,
+    installedPlugins: [{ id: 'tester.sample-plugin', dir: join(STUB_HOST.maibotRoot, 'plugins', 'another_dir') }],
   })
-  assert(codes(validation).has('plugin.duplicate_id'), '应报 ID 冲突')
+  assert(codes(validation).has('plugin.duplicate_id'), '两处都在 plugins/ 下应报 error')
+  assertEqual(validation.ok, false, '应判为不通过')
+})
+
+test('validate: 暂存副本（plugins/ 之外）只提示不报错', () => {
+  const installed = join(STUB_HOST.maibotRoot, 'plugins', 'tester_sample-plugin')
+  writePlugin(installed, pluginFiles())
+
+  const identical = runValidate(pluginFiles(), {
+    dir: join(tmpRoot, 'staged-copy'),
+    installedPlugins: [{ id: 'tester.sample-plugin', dir: installed }],
+  })
+  assert(!codes(identical).has('plugin.duplicate_id'), '暂存副本不应报 error')
+  assert(codes(identical).has('plugin.duplicate_id_staging'), '核心文件一致应提示为暂存副本')
+  assertEqual(identical.ok, true, '应通过校验（否则暂存→覆盖安装的流程会被判死）')
+
+  const changed = runValidate(pluginFiles({ 'plugin.py': ['del kwargs', 'del kwargs  # 改动'] }), {
+    dir: join(tmpRoot, 'staged-update'),
+    installedPlugins: [{ id: 'tester.sample-plugin', dir: installed }],
+  })
+  assert(codes(changed).has('plugin.duplicate_id_staged_update'), '代码不同应提示为待覆盖更新')
+  assertEqual(changed.ok, true, '仍应通过校验')
+})
+
+test('validate: 使用宿主保留命令会告警', () => {
+  const validation = runValidate(pluginFiles({
+    'plugin.py': [
+      '    @Command("hello", description="回复一条配置好的文本", pattern=r"^/hello$")',
+      '    @Command("pm", description="测试", pattern=r"^/pm\\s+(?P<text>.+)$")\n'
+        + '    @Command("hello", description="回复一条配置好的文本", pattern=r"^/hello$")',
+    ],
+  }))
+  assert(codes(validation).has('component.reserved_command'), '用了 /pm 应告警')
+  assertEqual(validation.ok, true, '保留命令只是警告，不阻断')
 })
 
 test('validate: 缺文件时报错', () => {
@@ -488,6 +528,27 @@ test('host: 解析能力注册表与 SDK 方法表', () => {
   assertEqual(methods.methods.get('render.html2png'), 'render.html2png', 'payload 变量形式')
   assertEqual(methods.byGroup.get('send').join(','), 'text', 'byGroup')
   assert(loadCtxMembers(pythonEnv).has('logger'), 'ctx 成员应含 logger')
+})
+
+// ── 宿主保留命令 ──────────────────────────────────────────────────────
+test('host: 读取宿主保留命令', () => {
+  const root = join(tmpRoot, 'reserved-root')
+  mkdirSync(join(root, 'src', 'plugins', 'built_in', 'plugin_management'), { recursive: true })
+  mkdirSync(join(root, 'src', 'maisaka', 'context'), { recursive: true })
+  writeFileSync(
+    join(root, 'src', 'plugins', 'built_in', 'plugin_management', 'plugin.py'),
+    '    @Command(\n        "management",\n        pattern=r"(?P<manage_command>^/pm(?:\\s+.+)?\\s*$)",\n        permission="operator",\n    )\n',
+    'utf8',
+  )
+  writeFileSync(
+    join(root, 'src', 'maisaka', 'context', 'clear_context.py'),
+    'CLEAR_CONTEXT_COMMAND = "/clear"\n',
+    'utf8',
+  )
+
+  const commands = loadReservedCommands(root)
+  assertEqual(commands.get('/pm')?.includes('plugin_management'), true, '应从内置插件 pattern 识别 /pm')
+  assertEqual(commands.get('/clear')?.includes('CLEAR_CONTEXT_COMMAND'), true, '应从命令常量识别 /clear')
 })
 
 // ── skill 投放 ────────────────────────────────────────────────────────
