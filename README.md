@@ -1,4 +1,8 @@
 # dsh-maibot-plugin-writer
+说真的，这个东西其实用处不大。
+不如来看看https://docs.mai-mai.org/plugin/vibe-coding吧
+这也只是我学习vibe-coding时做的一个没用的小插件罢了
+
 
 > 🤖 **本仓库（含全部代码、测试与文档）由 AI 编写与维护** —— 由 DeepSeek Harness 的 agent 在人类需求驱动下生成，见 [AI 编写声明](#ai-编写声明)。
 
