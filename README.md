@@ -1,6 +1,8 @@
 # dsh-maibot-plugin-writer
 说真的，这个东西其实用处不大。
+
 不如来看看https://docs.mai-mai.org/plugin/vibe-coding
+
 这也只是我学习vibe-coding时做的一个没用的小插件罢了
 
 
